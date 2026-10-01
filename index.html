@@ -301,7 +301,7 @@
         <div class="field">
           <label class="field-label" for="casier">
             Soumettre extrait B3
-            <span class="field-hint">Casier judiciaire — PDF, JPG ou PNG, max 5 Mo</span>
+            <span class="field-hint">Casier judiciaire — PDF, JPG ou PNG, max 5 Mo — facultatif si déjà communiqué</span>
           </label>
           <div class="upload-wrapper" id="upload-wrapper">
             <input
@@ -310,7 +310,6 @@
               name="casier"
               class="input-file"
               accept=".pdf,.jpg,.jpeg,.png"
-              required
             />
             <label for="casier" class="upload-label">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="upload-icon" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
@@ -445,12 +444,9 @@
         showError('err-nationalite', '');
       }
 
-      // Fichier casier
+      // Fichier casier (facultatif)
       const file = fileInput.files[0];
-      if (!file) {
-        showError('err-casier', 'Veuillez soumettre votre extrait B3.');
-        ok = false;
-      } else if (file.size > 5 * 1024 * 1024) {
+      if (file && file.size > 5 * 1024 * 1024) {
         showError('err-casier', 'Le fichier dépasse 5 Mo.');
         ok = false;
       } else {
@@ -501,20 +497,22 @@
       submitBtn.classList.add('loading');
 
       try {
-        // ── Étape 1 : upload du fichier → Cloudinary ─────────────────
+        // ── Étape 1 : upload du fichier → Cloudinary (facultatif) ────
         const file = fileInput.files[0];
+        let driveUrl = '';
 
-        const cloudinaryForm = new FormData();
-        cloudinaryForm.append('file', file);
-        cloudinaryForm.append('upload_preset', 'vzufnpgn');
+        if (file) {
+          const cloudinaryForm = new FormData();
+          cloudinaryForm.append('file', file);
+          cloudinaryForm.append('upload_preset', 'vzufnpgn');
 
-        const uploadRes = await fetch(
-          'https://api.cloudinary.com/v1_1/dhhllgzvs/auto/upload',
-          { method: 'POST', body: cloudinaryForm }
-        );
-        const uploadJson = await uploadRes.json();
-        console.log('Cloudinary response:', JSON.stringify(uploadJson));
-        const driveUrl = uploadJson.secure_url || '';
+          const uploadRes = await fetch(
+            'https://api.cloudinary.com/v1_1/dhhllgzvs/auto/upload',
+            { method: 'POST', body: cloudinaryForm }
+          );
+          const uploadJson = await uploadRes.json();
+          driveUrl = uploadJson.secure_url || '';
+        }
 
         // ── Étape 3 : données texte + lien Drive → Sheet ─────────────
         data.casier_url = driveUrl;
