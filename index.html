@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Déclaration Préfecture — Conseil d'Administration</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="page-wrapper">
+
+    <header class="form-header">
+      <p class="form-subtitle">APEL Sainte Marie Linselles Primaire</p>
+      <h1 class="form-title">Déclaration en préfecture</h1>
+      <p class="form-desc">Ce formulaire est réservé aux membres du conseil d'administration. Les informations collectées sont utilisées uniquement dans le cadre de la déclaration officielle auprès de la préfecture.</p>
+    </header>
+
+    <form id="ca-form" novalidate>
+
+      <!-- ── Section 1 : Fonction ── -->
+      <section class="form-section">
+        <h2 class="section-title">Fonction</h2>
+
+        <div class="field">
+          <label class="field-label" for="fonction">Fonction dans l'association</label>
+          <div class="select-wrapper">
+            <select id="fonction" name="fonction" class="input input--select" required>
+              <option value="">— Sélectionner —</option>
+              <option value="Président">Président</option>
+              <option value="Vice-président">Vice-président</option>
+              <option value="Trésorier">Trésorier</option>
+              <option value="Vice-trésorier">Vice-trésorier</option>
+              <option value="Secrétaire">Secrétaire</option>
+              <option value="Vice-secrétaire">Vice-secrétaire</option>
+              <option value="Membre actif">Membre actif</option>
+              <option value="Membre invité">Membre invité</option>
+              <option value="Vice tout - fait un peu tout">Vice tout - fait un peu tout</option>
+            </select>
+          </div>
+          <span class="field-error" id="err-fonction"></span>
+        </div>
+      </section>
+
+      <div style="height: var(--space-4);"></div>
+
+      <!-- ── Section 2 : Identité ── -->
+      <section class="form-section">
+        <h2 class="section-title">Identité</h2>
+
+        <!-- Civilité -->
+        <div class="field">
+          <span class="field-label">Civilité</span>
+          <div class="radio-group" role="radiogroup" aria-label="Civilité">
+            <label class="radio-label">
+              <input type="radio" name="civilite" value="Mme" required />
+              <span class="radio-custom"></span>
+              Mme
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="civilite" value="Mlle" />
+              <span class="radio-custom"></span>
+              Mlle
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="civilite" value="M." />
+              <span class="radio-custom"></span>
+              M.
+            </label>
+          </div>
+          <span class="field-error" id="err-civilite"></span>
+        </div>
+
+        <!-- Nom + Prénom -->
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label" for="nom">Nom</label>
+            <input
+              type="text"
+              id="nom"
+              name="nom"
+              class="input"
+              placeholder="DUPONT"
+              required
+              autocomplete="family-name"
+            />
+            <span class="field-error" id="err-nom"></span>
+          </div>
+          <div class="field">
+            <label class="field-label" for="prenom">Prénom</label>
+            <input
+              type="text"
+              id="prenom"
+              name="prenom"
+              class="input"
+              placeholder="Marie"
+              required
+              autocomplete="given-name"
+            />
+            <span class="field-error" id="err-prenom"></span>
+          </div>
+        </div>
+
+        <!-- Nationalité + Profession -->
+        <div class="field-row">
+          <div class="field">
+            <span class="field-label">Nationalité</span>
+            <div class="radio-group" role="radiogroup" aria-label="Nationalité">
+              <label class="radio-label">
+                <input type="radio" name="nationalite" value="Française" id="nat-fr" required />
+                <span class="radio-custom"></span>
+                Française
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="nationalite" value="Autre" id="nat-autre" />
+                <span class="radio-custom"></span>
+                Autre
+              </label>
+            </div>
+            <div class="conditional-field" id="nationalite-autre-wrapper">
+              <input
+                type="text"
+                id="nationalite-autre"
+                name="nationalite_autre"
+                class="input input--sm"
+                placeholder="Précisez votre nationalité"
+                autocomplete="off"
+              />
+            </div>
+            <span class="field-error" id="err-nationalite"></span>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="profession">Profession</label>
+            <input
+              type="text"
+              id="profession"
+              name="profession"
+              class="input"
+              placeholder="Ex : Enseignante"
+              required
+              autocomplete="organization-title"
+            />
+            <span class="field-error" id="err-profession"></span>
+          </div>
+        </div>
+
+      </section>
+
+      <div style="height: var(--space-4);"></div>
+
+      <!-- ── Section 3 : Adresse ── -->
+      <section class="form-section">
+        <h2 class="section-title">Adresse <span class="section-subtitle">Préciser l'adresse complète</span></h2>
+
+        <!-- Ligne 1 -->
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label" for="etage">Étage, escalier, appartement</label>
+            <input
+              type="text"
+              id="etage"
+              name="etage"
+              class="input"
+              placeholder="Ex : Apt 12, Esc B"
+              autocomplete="address-line2"
+            />
+          </div>
+          <div class="field">
+            <label class="field-label" for="immeuble">Immeuble, bâtiment, résidence</label>
+            <input
+              type="text"
+              id="immeuble"
+              name="immeuble"
+              class="input"
+              placeholder="Ex : Résidence Les Pins"
+              autocomplete="off"
+            />
+          </div>
+        </div>
+
+        <!-- Ligne 2 : N° + Extension + Type de voie + Nom de la voie -->
+        <div class="field-row field-row--4">
+          <div class="field field--narrow">
+            <label class="field-label" for="numero">N°</label>
+            <input
+              type="text"
+              id="numero"
+              name="numero"
+              class="input"
+              placeholder="12"
+              inputmode="numeric"
+              autocomplete="off"
+            />
+          </div>
+          <div class="field field--narrow">
+            <label class="field-label" for="extension">Extension</label>
+            <div class="select-wrapper">
+              <select id="extension" name="extension" class="input input--select">
+                <option value=""></option>
+                <option value="bis">bis</option>
+                <option value="ter">ter</option>
+                <option value="quater">quater</option>
+              </select>
+            </div>
+          </div>
+          <div class="field field--medium">
+            <label class="field-label" for="type-voie">Type de voie</label>
+            <div class="select-wrapper">
+              <select id="type-voie" name="type_voie" class="input input--select">
+                <option value=""></option>
+                <option value="Allée">Allée</option>
+                <option value="Avenue">Avenue</option>
+                <option value="Boulevard">Boulevard</option>
+                <option value="Chemin">Chemin</option>
+                <option value="Cité">Cité</option>
+                <option value="Clos">Clos</option>
+                <option value="Domaine">Domaine</option>
+                <option value="Hameau">Hameau</option>
+                <option value="Impasse">Impasse</option>
+                <option value="Lieu-dit">Lieu-dit</option>
+                <option value="Lotissement">Lotissement</option>
+                <option value="Passage">Passage</option>
+                <option value="Place">Place</option>
+                <option value="Résidence">Résidence</option>
+                <option value="Route">Route</option>
+                <option value="Rue">Rue</option>
+                <option value="Sentier">Sentier</option>
+                <option value="Square">Square</option>
+                <option value="Voie">Voie</option>
+              </select>
+            </div>
+          </div>
+          <div class="field field--wide">
+            <label class="field-label" for="nom-voie">Nom de la voie</label>
+            <input
+              type="text"
+              id="nom-voie"
+              name="nom_voie"
+              class="input"
+              placeholder="Ex : Victor Hugo"
+              autocomplete="address-line1"
+            />
+            <span class="field-error" id="err-nom-voie"></span>
+          </div>
+        </div>
+
+        <!-- Ligne 3 : Lieu-dit + Code postal + Commune -->
+        <div class="field-row field-row--3">
+          <div class="field">
+            <label class="field-label" for="lieu-dit">Lieu-dit ou boîte postale</label>
+            <input
+              type="text"
+              id="lieu-dit"
+              name="lieu_dit"
+              class="input"
+              placeholder="Ex : BP 42"
+              autocomplete="off"
+            />
+          </div>
+          <div class="field field--narrow">
+            <label class="field-label" for="code-postal">Code postal</label>
+            <input
+              type="text"
+              id="code-postal"
+              name="code_postal"
+              class="input"
+              placeholder="75001"
+              inputmode="numeric"
+              maxlength="5"
+              autocomplete="postal-code"
+            />
+            <span class="field-error" id="err-code-postal"></span>
+          </div>
+          <div class="field">
+            <label class="field-label" for="commune">Commune / Localité</label>
+            <input
+              type="text"
+              id="commune"
+              name="commune"
+              class="input"
+              placeholder="Ex : Paris"
+              required
+              autocomplete="address-level2"
+            />
+            <span class="field-error" id="err-commune"></span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ── Submit ── -->
+      <div class="form-footer">
+        <button type="submit" class="btn-submit" id="submit-btn">
+          <span class="btn-label">Envoyer ma déclaration</span>
+          <span class="btn-spinner" aria-hidden="true"></span>
+        </button>
+      </div>
+
+    </form>
+
+    <!-- ── Toast notifications ── -->
+    <div id="toast" class="toast" role="alert" aria-live="polite"></div>
+
+    <footer class="page-footer">
+      <p>Données collectées exclusivement pour la déclaration en préfecture — usage interne association.</p>
+    </footer>
+
+  </div>
+
+  <script>
+    // ── Configuration ──────────────────────────────────────────────
+    // Remplacez cette URL par celle de votre Apps Script déployé
+    const APPS_SCRIPT_URL = 'https://script.google.com/a/macros/naomi.fr/s/AKfycby_rsn3OoJs6AhdRsHvBVy0VO7Cq4DyfdEzUfOg8kF3-zIUfib1tb88Bzi2WojTG7zn/exec';
+
+    // ── Nationalité conditionnelle ─────────────────────────────────
+    const natRadios = document.querySelectorAll('input[name="nationalite"]');
+    const natAutreWrapper = document.getElementById('nationalite-autre-wrapper');
+    const natAutreInput = document.getElementById('nationalite-autre');
+
+    natRadios.forEach(radio => {
+      radio.addEventListener('change', () => {
+        const isAutre = document.getElementById('nat-autre').checked;
+        natAutreWrapper.classList.toggle('visible', isAutre);
+        natAutreInput.required = isAutre;
+        if (!isAutre) natAutreInput.value = '';
+      });
+    });
+
+    // ── Validation ─────────────────────────────────────────────────
+    function showError(id, msg) {
+      const el = document.getElementById(id);
+      if (el) { el.textContent = msg; el.classList.toggle('visible', !!msg); }
+    }
+
+    function validate(data) {
+      let ok = true;
+
+      const required = [
+        { field: 'fonction',    errId: 'err-fonction',    label: 'Veuillez sélectionner une fonction.' },
+        { field: 'nom',         errId: 'err-nom',         label: 'Le nom est requis.' },
+        { field: 'prenom',      errId: 'err-prenom',      label: 'Le prénom est requis.' },
+        { field: 'profession',  errId: 'err-profession',  label: 'La profession est requise.' },
+        { field: 'commune',     errId: 'err-commune',     label: 'La commune est requise.' },
+      ];
+
+      required.forEach(({ field, errId, label }) => {
+        const val = (data[field] || '').trim();
+        showError(errId, val ? '' : label);
+        if (!val) ok = false;
+      });
+
+      // Civilité
+      if (!data.civilite) {
+        showError('err-civilite', 'Veuillez sélectionner une civilité.');
+        ok = false;
+      } else {
+        showError('err-civilite', '');
+      }
+
+      // Nationalité
+      if (!data.nationalite) {
+        showError('err-nationalite', 'Veuillez sélectionner une nationalité.');
+        ok = false;
+      } else if (data.nationalite === 'Autre' && !(data.nationalite_autre || '').trim()) {
+        showError('err-nationalite', 'Veuillez préciser votre nationalité.');
+        ok = false;
+      } else {
+        showError('err-nationalite', '');
+      }
+
+      return ok;
+    }
+
+    // ── Toast ──────────────────────────────────────────────────────
+    const toast = document.getElementById('toast');
+    let toastTimer;
+
+    function showToast(type, message) {
+      clearTimeout(toastTimer);
+      toast.textContent = message;
+      toast.className = `toast toast--${type} toast--visible`;
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('toast--visible');
+      }, type === 'success' ? 4000 : 6000);
+    }
+
+    // ── Soumission ─────────────────────────────────────────────────
+    const form = document.getElementById('ca-form');
+    const submitBtn = document.getElementById('submit-btn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const fd = new FormData(form);
+      const data = Object.fromEntries(fd.entries());
+
+      // Nationalité finale
+      if (data.nationalite === 'Autre' && data.nationalite_autre) {
+        data.nationalite = data.nationalite_autre;
+      }
+      delete data.nationalite_autre;
+
+      if (!validate(data)) {
+        const firstErr = form.querySelector('.field-error.visible');
+        if (firstErr) firstErr.closest('.field')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        showToast('error', 'Veuillez remplir tous les champs obligatoires.');
+        return;
+      }
+
+      // État chargement
+      submitBtn.disabled = true;
+      submitBtn.classList.add('loading');
+
+      try {
+        const params = new URLSearchParams(data);
+        await fetch(APPS_SCRIPT_URL + '?' + params.toString(), { mode: 'no-cors' });
+
+        form.reset();
+        natAutreWrapper.classList.remove('visible');
+        showToast('success', 'Informations bien reçues. Merci !');
+      } catch {
+        showToast('error', 'Une erreur est survenue. Veuillez réessayer.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('loading');
+      }
+    });
+  </script>
+
+</body>
+</html>
