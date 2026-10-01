@@ -513,6 +513,7 @@
           { method: 'POST', body: cloudinaryForm }
         );
         const uploadJson = await uploadRes.json();
+        console.log('Cloudinary response:', JSON.stringify(uploadJson));
         const driveUrl = uploadJson.secure_url || '';
 
         // ── Étape 3 : données texte + lien Drive → Sheet ─────────────
