@@ -292,6 +292,42 @@
 
       </section>
 
+      <div style="height: var(--space-4);"></div>
+
+      <!-- ── Section 4 : Documents ── -->
+      <section class="form-section">
+        <h2 class="section-title">Document</h2>
+
+        <div class="field">
+          <label class="field-label" for="casier">
+            Soumettre extrait B3
+            <span class="field-hint">Casier judiciaire — PDF, JPG ou PNG, max 5 Mo</span>
+          </label>
+          <div class="upload-wrapper" id="upload-wrapper">
+            <input
+              type="file"
+              id="casier"
+              name="casier"
+              class="input-file"
+              accept=".pdf,.jpg,.jpeg,.png"
+              required
+            />
+            <label for="casier" class="upload-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="upload-icon" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span class="upload-text">Choisir un fichier</span>
+              <span class="upload-hint">ou glisser-déposer ici</span>
+            </label>
+            <div class="upload-preview" id="upload-preview" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="upload-icon upload-icon--sm" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span id="upload-filename"></span>
+              <button type="button" class="upload-remove" id="upload-remove" aria-label="Supprimer le fichier">✕</button>
+            </div>
+          </div>
+          <span class="field-error" id="err-casier"></span>
+        </div>
+
+      </section>
+
       <!-- ── Submit ── -->
       <div class="form-footer">
         <button type="submit" class="btn-submit" id="submit-btn">
@@ -314,7 +350,7 @@
   <script>
     // ── Configuration ──────────────────────────────────────────────
     // Remplacez cette URL par celle de votre Apps Script déployé
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwuJG_RFB6p7GYEu6dCNd6iSPaUMMS7fiUpyIySTGVPkYH6tn-ayEHyArJKqFWEXmX8/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzWN0JhKjN-MkY5uATBBvbdoVj-zJA9J0Q5Kua2i0j-4AcIRojH-KzieT_76_PEjjs/exec';
 
     // ── Nationalité conditionnelle ─────────────────────────────────
     const natRadios = document.querySelectorAll('input[name="nationalite"]');
@@ -328,6 +364,43 @@
         natAutreInput.required = isAutre;
         if (!isAutre) natAutreInput.value = '';
       });
+    });
+
+    // ── Upload preview ─────────────────────────────────────────────
+    const fileInput = document.getElementById('casier');
+    const uploadPreview = document.getElementById('upload-preview');
+    const uploadFilename = document.getElementById('upload-filename');
+    const uploadWrapper = document.getElementById('upload-wrapper');
+    const uploadRemove = document.getElementById('upload-remove');
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length > 0) {
+        uploadFilename.textContent = fileInput.files[0].name;
+        uploadPreview.hidden = false;
+        uploadWrapper.classList.add('has-file');
+        showError('err-casier', '');
+      }
+    });
+
+    uploadRemove.addEventListener('click', () => {
+      fileInput.value = '';
+      uploadPreview.hidden = true;
+      uploadWrapper.classList.remove('has-file');
+    });
+
+    // Drag & drop
+    uploadWrapper.addEventListener('dragover', (e) => { e.preventDefault(); uploadWrapper.classList.add('drag-over'); });
+    uploadWrapper.addEventListener('dragleave', () => uploadWrapper.classList.remove('drag-over'));
+    uploadWrapper.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadWrapper.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        fileInput.files = dt.files;
+        fileInput.dispatchEvent(new Event('change'));
+      }
     });
 
     // ── Validation ─────────────────────────────────────────────────
@@ -370,6 +443,18 @@
         ok = false;
       } else {
         showError('err-nationalite', '');
+      }
+
+      // Fichier casier
+      const file = fileInput.files[0];
+      if (!file) {
+        showError('err-casier', 'Veuillez soumettre votre extrait B3.');
+        ok = false;
+      } else if (file.size > 5 * 1024 * 1024) {
+        showError('err-casier', 'Le fichier dépasse 5 Mo.');
+        ok = false;
+      } else {
+        showError('err-casier', '');
       }
 
       return ok;
@@ -416,15 +501,40 @@
       submitBtn.classList.add('loading');
 
       try {
+        // ── Étape 1 : upload du fichier → Drive ──────────────────────
+        const file = fileInput.files[0];
+        const base64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result.split(',')[1]);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+
+        const uploadRes = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'upload',
+            filename: file.name,
+            mimeType: file.type,
+            file: base64,
+          }),
+        });
+        const uploadJson = await uploadRes.json();
+        const driveUrl = uploadJson.url || '';
+
+        // ── Étape 2 : données texte + lien Drive → Sheet ─────────────
+        data.casier_url = driveUrl;
         const params = new URLSearchParams(data);
         await new Promise((resolve) => {
           const img = new Image();
           img.onload = img.onerror = resolve;
           img.src = APPS_SCRIPT_URL + '?' + params.toString();
-          setTimeout(resolve, 5000); // fallback 5s
+          setTimeout(resolve, 5000);
         });
 
         form.reset();
+        uploadPreview.hidden = true;
+        uploadWrapper.classList.remove('has-file');
         natAutreWrapper.classList.remove('visible');
         showToast('success', 'Informations bien reçues. Merci !');
       } catch {
