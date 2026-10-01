@@ -349,8 +349,9 @@
 
   <script>
     // ── Configuration ──────────────────────────────────────────────
-    // Remplacez cette URL par celle de votre Apps Script déployé
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzWN0JhKjN-MkY5uATBBvbdoVj-zJA9J0Q5Kua2i0j-4AcIRojH-KzieT_76_PEjjs/exec';
+    const DRIVE_API_KEY   = 'AIzaSyDxzCkKsb_MqllP3pJ_QLrdvo3rBVG57tE';
+    const DRIVE_FOLDER_ID = '1u5j7qaHFKk6p4AvoR5HgC00DDWh3SOL0';
 
     // ── Nationalité conditionnelle ─────────────────────────────────
     const natRadios = document.querySelectorAll('input[name="nationalite"]');
@@ -501,28 +502,72 @@
       submitBtn.classList.add('loading');
 
       try {
-        // ── Étape 1 : upload du fichier → Drive ──────────────────────
+        // ── Étape 1 : upload du fichier → Google Drive API ────────────
         const file = fileInput.files[0];
-        const base64 = await new Promise((resolve, reject) => {
+
+        // Métadonnées du fichier
+        const metadata = {
+          name: Date.now() + '_' + file.name,
+          parents: [DRIVE_FOLDER_ID],
+        };
+
+        // Requête multipart
+        const boundary = '-------FormBoundary' + Date.now();
+        const delimiter = '\r\n--' + boundary + '\r\n';
+        const closeDelimiter = '\r\n--' + boundary + '--';
+
+        const fileContent = await new Promise((resolve, reject) => {
           const reader = new FileReader();
-          reader.onload = () => resolve(reader.result.split(',')[1]);
+          reader.onload = () => resolve(reader.result);
           reader.onerror = reject;
-          reader.readAsDataURL(file);
+          reader.readAsArrayBuffer(file);
         });
 
-        const uploadRes = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify({
-            action: 'upload',
-            filename: file.name,
-            mimeType: file.type,
-            file: base64,
-          }),
-        });
+        const metadataPart =
+          delimiter +
+          'Content-Type: application/json\r\n\r\n' +
+          JSON.stringify(metadata);
+
+        const encoder = new TextEncoder();
+        const metadataBytes = encoder.encode(metadataPart);
+        const filePart = encoder.encode(
+          '\r\n--' + boundary + '\r\nContent-Type: ' + file.type + '\r\n\r\n'
+        );
+        const closeBytes = encoder.encode(closeDelimiter);
+
+        const body = new Uint8Array(
+          metadataBytes.byteLength + filePart.byteLength + fileContent.byteLength + closeBytes.byteLength
+        );
+        let offset = 0;
+        body.set(metadataBytes, offset); offset += metadataBytes.byteLength;
+        body.set(filePart, offset);      offset += filePart.byteLength;
+        body.set(new Uint8Array(fileContent), offset); offset += fileContent.byteLength;
+        body.set(closeBytes, offset);
+
+        const uploadRes = await fetch(
+          'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&key=' + DRIVE_API_KEY,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'multipart/related; boundary="' + boundary + '"' },
+            body: body,
+          }
+        );
         const uploadJson = await uploadRes.json();
-        const driveUrl = uploadJson.url || '';
+        const fileId = uploadJson.id;
 
-        // ── Étape 2 : données texte + lien Drive → Sheet ─────────────
+        // ── Étape 2 : rendre le fichier public ────────────────────────
+        await fetch(
+          'https://www.googleapis.com/drive/v3/files/' + fileId + '/permissions?key=' + DRIVE_API_KEY,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role: 'reader', type: 'anyone' }),
+          }
+        );
+
+        const driveUrl = 'https://drive.google.com/file/d/' + fileId + '/view';
+
+        // ── Étape 3 : données texte + lien Drive → Sheet ─────────────
         data.casier_url = driveUrl;
         const params = new URLSearchParams(data);
         await new Promise((resolve) => {
@@ -537,7 +582,8 @@
         uploadWrapper.classList.remove('has-file');
         natAutreWrapper.classList.remove('visible');
         showToast('success', 'Informations bien reçues. Merci !');
-      } catch {
+      } catch (err) {
+        console.error(err);
         showToast('error', 'Une erreur est survenue. Veuillez réessayer.');
       } finally {
         submitBtn.disabled = false;
