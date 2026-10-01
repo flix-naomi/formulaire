@@ -181,6 +181,17 @@ body {
   font-style: italic;
 }
 
+.field-link {
+  color: var(--clr-accent);
+  text-decoration: underline;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.field-link:hover {
+  color: var(--clr-accent-dark);
+}
+
 /* ── Inputs ── */
 .input {
   font-family: var(--font);
